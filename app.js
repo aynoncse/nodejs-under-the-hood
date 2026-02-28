@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { v4: uuidv4 } = require('uuid');
 
 const http = require('http');
 const mongoose = require('mongoose');
@@ -19,12 +18,39 @@ mongoose
   .catch((err) => console.error('Error connecting to Atlas:', err));
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    trim: true,
+    unique: true,
+    match: [
+      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+      'Please add a valid email',
+    ],
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 const User = mongoose.model('User', userSchema);
+
+const getRequestBody = (req) => {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => (body += chunk.toString()));
+    req.on('end', () => {
+      try {
+        resolve(JSON.parse(body));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+};
 
 const server = http.createServer(async (req, res) => {
   const { method, url } = req;
@@ -43,29 +69,33 @@ const server = http.createServer(async (req, res) => {
 
   // Create User
   else if (url === '/users' && method === 'POST') {
-    let body = '';
-
-    req.on('data', (chunk) => (body += chunk.toString()));
-
-    req.on('end', async () => {
-      try {
-        const userData = JSON.parse(body);
-        const newUser = new User({
-          name: userData.name,
-          email: userData.email,
-          id: uuidv4(),
-        });
-        await newUser.save();
-        res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'User created successfully', user: newUser }));
-      } catch (error) {
-        res.writeHead(500);
-        res.end('Server Error');
-      }
-    });
-
+    try {
+      const userData = await getRequestBody(req);
+      const newUser = new User(userData);
+      await newUser.save();
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          message: 'User created successfully',
+          user: newUser,
+        }),
+      );
+    } catch (error) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    
   } else if (url.startsWith('/users/') && method === 'DELETE') {
     const id = url.split('/')[2];
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          error: 'Invalid ID format. Must be a 24-character hex string.',
+        }),
+      );
+    }
 
     try {
       await User.findByIdAndDelete(id);
@@ -75,34 +105,34 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(404);
       res.end('User not found');
     }
-   
   } else if (url.startsWith('/users/') && method === 'PUT') {
     const id = url.split('/')[2];
 
-    let body = '';
-    req.on('data', (chunk) => (body += chunk.toString()));
-
-    req.on('end', async() => {
-      try {
-        const updateData = JSON.parse(body);
-        const updatedUser = await User.findByIdAndUpdate(id, updateData, {
-          returnDocument: 'after',
-        });
-        res.end(
-          JSON.stringify({
-            message: 'User updated successfully',
-            user: updatedUser,
-          }),
-        );
-      } catch (error) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            error: 'Update failed',
-          }),
-        );
-      }
-    });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          error: 'Invalid ID format. Must be a 24-character hex string.',
+        }),
+      );
+    }
+    
+    try {
+      const userData = await getRequestBody(req);
+      const updatedUser = await User.findByIdAndUpdate(id, userData, {
+        returnDocument: 'after',
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          message: 'User updated successfully',
+          user: updatedUser,
+        }),
+      );
+    } catch (error) {
+      res.writeHead(404);
+      res.end('User not found');
+    }
   } else {
     res.writeHead(404);
     return res.end('Not Found');

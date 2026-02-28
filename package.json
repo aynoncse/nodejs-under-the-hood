@@ -12,7 +12,6 @@
   "type": "commonjs",
   "dependencies": {
     "dotenv": "^17.3.1",
-    "mongoose": "^9.2.3",
-    "uuid": "^13.0.0"
+    "mongoose": "^9.2.3"
   }
 }
