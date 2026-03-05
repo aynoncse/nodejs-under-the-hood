@@ -11,6 +11,12 @@ const userRoutes = require('./routes/userRoutes');
 connectDB();
 
 const server = http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setSecurityHeaders(res);
+    res.writeHead(204);
+    return res.end();
+  }
+
   const startTime = Date.now();
 
   const sendResponse = (statusCode, data) => {
