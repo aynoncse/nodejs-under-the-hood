@@ -31,6 +31,11 @@ const server = http.createServer(async (req, res) => {
   try {
     const parsedUrl = urlModule.parse(req.url, true);
     const pathname = parsedUrl.pathname;
+
+    if(pathname === '/signup' || pathname === '/login') {
+      return await userRoutes(req, res, parsedUrl, sendResponse);
+    }
+
     if(pathname.startsWith('/users')) {
       return await userRoutes(req, res, parsedUrl, sendResponse);
     }

@@ -2,6 +2,9 @@ const logger = require("./logger");
 const setSecurityHeaders = require("./securityHeader");
 
 const errorResponse = (req, res, error, startTime) => {
+  const duration = Date.now() - startTime;
+  logger(req, error.statusCode || 500, duration, error);
+
   setSecurityHeaders(res);
   let statusCode = 500;
   let message = 'Internal Server Error';
@@ -26,11 +29,19 @@ const errorResponse = (req, res, error, startTime) => {
     message = `Invalid ${error.path}: ${error.value}`;
   }
 
-  const duration = Date.now() - startTime;
-  logger(req, statusCode, duration);
+  // already logged above before header sent, but recalc for completeness
+  // include stack/message in development to ease debugging
+  const responseBody = { status: 'fail', message };
+  
+  if (process.env.NODE_ENV !== 'production') {
+    responseBody.error = {
+      message: error.message,
+      stack: error.stack,
+    };
+  }
 
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'fail', message }));
+  res.end(JSON.stringify(responseBody));
 };
 
 module.exports = errorResponse;

@@ -10,7 +10,7 @@ const connectDB = async () => {
     try {
         await mongoose
            .connect(process.env.MONGO_URI, {
-             dbName: 'mini-json-database',
+             dbName: process.env.DB_NAME,
            })
            console.log('Successfully connected to MongoDB Atlas!');
     } catch (error) {

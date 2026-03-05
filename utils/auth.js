@@ -1,10 +1,20 @@
+const jwt = require('jsonwebtoken');
+
 const authMiddleware = (req) => {
-  const token = req.headers['authorization'];
-  const secretKey = 'my-secret-key';
-  if (token && token == secretKey) {
-    return { success: true };
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { success: false, message: 'Please login first' };
   }
-  return { success: false };
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return { success: true, userId: decoded.id };
+  } catch (err) {
+    return { success: false, message: 'Token is invalid or expired' };
+  }
 };
 
 module.exports = authMiddleware;

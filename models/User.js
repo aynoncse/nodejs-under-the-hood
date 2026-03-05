@@ -16,6 +16,15 @@ const userSchema = new mongoose.Schema({
       'Please add a valid email',
     ],
   },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
