@@ -20,6 +20,11 @@ const getAllUsers = async (req, res, queryData, sendResponse) => {
 
 const createUser = async (req, res, sendResponse) => {
   const userData = await getRequestBody(req);
+  const validation = validateUser(userData);
+  if (!validation.isValid) {
+    return sendResponse(400, { status: 'Validation failed', errors: validation.errors });
+  }
+  
   const user = await User.create(userData);
   return sendResponse(201, {
     status: 'success',
