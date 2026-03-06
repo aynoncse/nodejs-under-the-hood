@@ -6,7 +6,13 @@ const errorResponse = require('./utils/errorResponse');
 const setSecurityHeaders = require('./utils/securityHeader');
 const urlModule = require('url');
 const userRoutes = require('./routes/userRoutes');
-const { getUploadPage, uploadFile } = require('./controllers/fileUploadController');
+const {
+  getUploadPage,
+  uploadFile,
+} = require('./controllers/fileUploadController');
+
+const path = require('path');
+const fs = require('fs');
 
 // Connect to Database
 connectDB();
@@ -41,6 +47,23 @@ const server = http.createServer(async (req, res) => {
       return await userRoutes(req, res, parsedUrl, sendResponse);
     }
 
+    if (pathname.startsWith('/uploads/') && req.method === 'GET') {
+      const filePath = path.join(__dirname, pathname);
+      if (fs.existsSync(filePath)) {
+        const ext = path.extname(filePath).toLowerCase();
+        const mimeTypes = {
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.gif': 'image/gif',
+        };
+        res.writeHead(200, {
+          'Content-Type': mimeTypes[ext] || 'application/octet-stream',
+        });
+        return fs.createReadStream(filePath).pipe(res);
+      }
+    }
+
     if (pathname.startsWith('/upload') && req.method === 'GET') {
       // render upload form via controller
       return getUploadPage(req, res);
@@ -53,7 +76,6 @@ const server = http.createServer(async (req, res) => {
 
     // nothing matched; respond 404
     return sendResponse(404, { status: 'fail', error: 'Not Found' });
-    
   } catch (error) {
     return errorResponse(req, res, error, startTime);
   }
