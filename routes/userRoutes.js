@@ -6,12 +6,23 @@ const {
   updateUser,
 } = require('../controllers/userController');
 const authMiddleware = require('../utils/auth');
+const mongoose = require('mongoose');
+const { getUploadPage, uploadFile } = require('../controllers/fileUploadController');
 
 const userRoutes = async (req, res, parsedUrl, sendResponse) => {
   const queryData = parsedUrl.query;
   const pathname = parsedUrl.pathname;
 
   const { method, url } = req;
+
+  // unauthenticated endpoints
+  if (pathname.startsWith('/upload') && method === 'GET') {
+    return getUploadPage(req, res);
+  }
+
+  if (pathname.startsWith('/upload') && method === 'POST') {
+    return uploadFile(req, res, sendResponse);
+  }
 
   if(pathname === '/signup' && method === 'POST') {
     return signup(req, res, sendResponse);
@@ -51,5 +62,6 @@ const userRoutes = async (req, res, parsedUrl, sendResponse) => {
     }
   }
 };
+
 
 module.exports = userRoutes;

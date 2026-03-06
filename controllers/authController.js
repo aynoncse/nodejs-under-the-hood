@@ -10,9 +10,6 @@ const signup = async (req, res, sendResponse) => {
 
   const validate = validateSignupForm({ name, email, password });
 
-  console.log('validate', validate);
-  
-
   if (!validate.isValid) {
     return sendResponse(400, { status: 'Validation failed', errors: validate.errors });
   }

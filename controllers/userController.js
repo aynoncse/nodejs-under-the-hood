@@ -24,7 +24,7 @@ const createUser = async (req, res, sendResponse) => {
   if (!validation.isValid) {
     return sendResponse(400, { status: 'Validation failed', errors: validation.errors });
   }
-  
+
   const user = await User.create(userData);
   return sendResponse(201, {
     status: 'success',
@@ -35,7 +35,6 @@ const createUser = async (req, res, sendResponse) => {
 
 const deleteUser = async (id, sendResponse) => {
   const deleted = await User.findByIdAndDelete(id);
-  console.log('Deleted User : ', deleted);
   
   if (!deleted) {
     return sendResponse(404, { status: 'fail', error: 'User not found' });

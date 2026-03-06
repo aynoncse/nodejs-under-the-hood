@@ -6,6 +6,7 @@ const errorResponse = require('./utils/errorResponse');
 const setSecurityHeaders = require('./utils/securityHeader');
 const urlModule = require('url');
 const userRoutes = require('./routes/userRoutes');
+const { getUploadPage, uploadFile } = require('./controllers/fileUploadController');
 
 // Connect to Database
 connectDB();
@@ -32,15 +33,27 @@ const server = http.createServer(async (req, res) => {
     const parsedUrl = urlModule.parse(req.url, true);
     const pathname = parsedUrl.pathname;
 
-    if(pathname === '/signup' || pathname === '/login') {
+    if (pathname === '/signup' || pathname === '/login') {
       return await userRoutes(req, res, parsedUrl, sendResponse);
     }
 
-    if(pathname.startsWith('/users')) {
+    if (pathname.startsWith('/users')) {
       return await userRoutes(req, res, parsedUrl, sendResponse);
     }
-   
-    return sendResponse(404, { status: 'fail', error: 'Route Not Found' });
+
+    if (pathname.startsWith('/upload') && req.method === 'GET') {
+      // render upload form via controller
+      return getUploadPage(req, res);
+    }
+
+    if (pathname.startsWith('/upload') && req.method === 'POST') {
+      // delegate file handling to controller
+      return uploadFile(req, res, sendResponse);
+    }
+
+    // nothing matched; respond 404
+    return sendResponse(404, { status: 'fail', error: 'Not Found' });
+    
   } catch (error) {
     return errorResponse(req, res, error, startTime);
   }
