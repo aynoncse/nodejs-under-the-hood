@@ -7,10 +7,13 @@ A professional-grade RESTful API built entirely with **Core Node.js**, without u
 * **Modular MVC Architecture**: Clean separation of concerns with Routes, Controllers, Models, and Utils.
 * **Custom Routing & Middleware**: Hand-coded router with custom authentication and validation middleware.
 * **JWT Authentication**: Secure login system using JSON Web Tokens (JWT) and password hashing with Bcrypt.
-* **Manual Image Upload**: Handled multipart/form-data parsing using raw Node.js Buffers and Streams (No Multer/Formidable).
+* **Secure Manual Image Upload**: 
+    * Handled `multipart/form-data` parsing using raw Node.js Buffers.
+    * **Size Validation**: Early rejection of files larger than 5MB using `content-length` headers.
+    * **Type Validation**: Strict checking for allowed image extensions (.jpg, .png, .webp).
 * **Security Focused**: Implemented manual CORS handling and essential security headers.
-* **Database Integration**: Connected to MongoDB using Mongoose for schema-based data management.
-* **Request Logging**: Custom logger to track API performance and response times.
+* **Database Integration**: Connected to MongoDB using Mongoose.
+* **Request Logging**: Custom logger to track API performance and status codes.
 
 ## 🛠️ Technology Stack
 
@@ -43,8 +46,10 @@ A professional-grade RESTful API built entirely with **Core Node.js**, without u
 **3. Configure Environment**
 Create a **.env** file in the root directory and add:
 * PORT=3000
+* DB_NAME=your_db_name
 * MONGO_URI=your_mongodb_connection_string
 * JWT_SECRET=your_jwt_secret_key
+* JWT_EXPIRES_IN=24h
 
 **4. Run the server**
 > npm start
