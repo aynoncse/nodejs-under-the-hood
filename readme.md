@@ -1,72 +1,142 @@
-# Custom Core Node.js Backend API (No Framework)
+# Core Node.js REST API (Framework‑Free)
 
-A professional-grade RESTful API built entirely with **Core Node.js**, without using any frameworks like Express.js. This project demonstrates a deep understanding of Node.js internals, including manual routing, middleware implementation, JWT authentication, and raw multipart/form-data parsing for image uploads.
+This repository hosts a battle‑tested, RESTful backend API implemented solely with **Node.js core modules**. No external web frameworks (e.g. Express, Koa) are used—everything from routing to request parsing is written by hand to demonstrate an in‑depth command of the Node.js runtime and HTTP internals.
 
-## 🌟 Key Features
+---
 
-* **Modular MVC Architecture**: Clean separation of concerns with Routes, Controllers, Models, and Utils.
-* **Custom Routing & Middleware**: Hand-coded router with custom authentication and validation middleware.
-* **JWT Authentication**: Secure login system using JSON Web Tokens (JWT) and password hashing with Bcrypt.
-* **Secure Manual Image Upload**: 
-    * Handled `multipart/form-data` parsing using raw Node.js Buffers.
-    * **Size Validation**: Early rejection of files larger than 5MB using `content-length` headers.
-    * **Type Validation**: Strict checking for allowed image extensions (.jpg, .png, .webp).
-* **Security Focused**: Implemented manual CORS handling and essential security headers.
-* **Database Integration**: Connected to MongoDB using Mongoose.
-* **Request Logging**: Custom logger to track API performance and status codes.
+## 🚀 Overview
 
-## 🛠️ Technology Stack
+- **Purpose**: Serve as both a learning tool and a production‑ready template for developers interested in low‑level Node.js architecture.
+- **Design**: Modular MVC pattern with clearly defined boundaries between routes, controllers, models and utilities.
+- **Security**: Built‑in JWT authentication, input validation, CORS handling, and header hardening.
+- **Data Storage**: MongoDB is used for persistence via Mongoose ODM.
 
-* **Runtime**: Node.js
-* **Database**: MongoDB (via Mongoose)
-* **Auth**: JSONWebToken & BcryptJS
-* **Environment**: Dotenv for secure configuration management
+---
 
-## 📂 Project Structure
+## 🔑 Core Features
 
-    ├── config/             # Database connection setup
-    ├── controllers/        # Business logic (User, Auth, Upload)
-    ├── models/             # Mongoose Schemas
-    ├── routes/             # Manual route handling logic
-    ├── utils/              # Body parser, Logger, Validators
-    ├── uploads/            # Directory for stored images
-    ├── .env                # Environment variables
-    ├── app.js              # Server entry point
-    └── package.json        # Dependencies
+1. **Custom Routing & Middleware**
+   - Lightweight, hand‑rolled router that matches HTTP methods and paths.
+   - Middleware support for authentication, validation and error handling.
 
-## 🚀 Getting Started
+2. **Authentication**
+   - User registration and login with JWT tokens.
+   - Passwords hashed with BcryptJS; tokens expire by configuration.
 
-**1. Clone the repository**
-> git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-> cd your-repo-name
+3. **Multipart File Uploads**
+   - Manual parsing of `multipart/form-data` requests using Node.js `Buffer`.
+   - Early abort for files >5 MB (using `Content-Length` header).
+   - Strict extension checking (.jpg, .png, .webp) and secure storage.
 
-**2. Install dependencies**
-> npm install
+4. **Security Enhancements**
+   - CORS policy enforcement without external middleware.
+   - Common security headers added to every response.
 
-**3. Configure Environment**
-Create a **.env** file in the root directory and add:
-* PORT=3000
-* DB_NAME=your_db_name
-* MONGO_URI=your_mongodb_connection_string
-* JWT_SECRET=your_jwt_secret_key
-* JWT_EXPIRES_IN=24h
+5. **Logging & Monitoring**
+   - Custom logger captures timestamp, route, response status and duration.
 
-**4. Run the server**
-> npm start
+6. **Database Integration**
+   - Mongoose schemas, models and connection management contained under `config/`.
 
-## 🔌 API Endpoints
+---
 
-### Auth & Users
-* **POST /signup** - Register a new user
-* **POST /login** - Login and receive JWT token
-* **GET /users** - Get all users (Supports filtering)
-* **PUT /users/:id** - Update user (Requires Token)
-* **DELETE /users/:id** - Delete user (Requires Token)
+## 🛠 Technology Stack
 
-### File Upload
-* **GET /upload** - Serves a simple HTML form to test uploads
-* **POST /upload** - Endpoint to handle raw multipart image uploads
-* **GET /uploads/:filename** - Serves static uploaded images
+| Layer         | Technology            |
+|---------------|-----------------------|
+| Runtime       | Node.js (LTS)         |
+| Database      | MongoDB (+ Mongoose)  |
+| Authentication| JWT, BcryptJS         |
+| Configuration | dotenv                |
 
-## 💡 Lessons Learned
-By building this project without a framework, I mastered the **Node.js HTTP module**, **Buffers**, and **Streams**. I successfully implemented a manual multipart parser to handle binary data and gained a profound understanding of how middleware and routing work under the hood.
+---
+
+## 📁 Directory Layout
+
+```
+├── config/             # MongoDB connection & settings
+├── controllers/        # Route handler logic
+├── models/             # Mongoose schema definitions
+├── routes/             # Path matching and dispatch
+├── utils/              # Helpers: parser, validator, logger
+├── uploads/            # Static file storage (images)
+├── app.js              # HTTP server bootstrap
+├── package.json        # Dependencies & scripts
+└── readme.md           # This document
+```
+
+---
+
+## 🛣️ Setup Instructions
+
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/your-username/your-repo.git
+   cd your-repo
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment**
+   Create a `.env` file at the project root with the following variables:
+   ```env
+   PORT=3000
+   DB_NAME=<your_db_name>
+   MONGO_URI=<your_mongodb_uri>
+   JWT_SECRET=<secure_random_string>
+   JWT_EXPIRES_IN=24h
+   ```
+
+4. **Start the server**
+   ```bash
+   npm start
+   ```
+   The API listens on the port defined in `PORT`.
+
+---
+
+## 📡 Available Endpoints
+
+### Authentication & User Management
+
+| Method | Endpoint        | Description                        | Auth Required |\n|--------|-----------------|------------------------------------|---------------|
+| POST   | `/signup`       | Create a new user                  | No            |
+| POST   | `/login`        | Authenticate and obtain JWT        | No            |
+| GET    | `/users`        | List users (supports query filter) | No            |
+| PUT    | `/users/:id`    | Modify user by ID                  | Yes           |
+| DELETE | `/users/:id`    | Remove user by ID                  | Yes           |
+
+### File Uploads
+
+| Method | Endpoint                 | Description                                |
+|--------|--------------------------|--------------------------------------------|
+| GET    | `/upload`                | Returns a basic HTML form for manual tests |
+| POST   | `/upload`                | Handle raw image upload                    |
+| GET    | `/uploads/:filename`     | Serve uploaded file                        |
+
+---
+
+## 🧠 What You’ll Learn
+
+This codebase exposes the reader to:
+
+* Node.js `http` module mechanics
+* Buffer and stream manipulation for request bodies
+* Hand‑crafted middleware and routing logic
+* JWT workflows without helper libraries
+* Manual multipart parsing for binary data
+
+It is an excellent reference for developers looking to deepen their understanding of Node.js beyond abstraction layers provided by popular frameworks.
+
+---
+
+## ✅ License
+
+Distributed under the [MIT License](LICENSE).
+
+---
+
+*Created by [Sador Uddin Bhuiyan](https://github.com/aynoncse) – feel free to fork and adapt for your projects.*
