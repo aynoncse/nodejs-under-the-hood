@@ -1,10 +1,23 @@
 /**
+ * Title: Core Node.js REST API
+ * Description: A battle-tested, RESTful backend API implemented solely with Node.js core modules
+ * Author: Sador Uddin Bhuiyan Aynon
+ * Date: 2026-03-01
+ */
+
+/**
  * app.js - Main HTTP server for the application
  *
- * This file manually implements a basic HTTP server without Express.  It
- * illustrates a low‑level approach suitable for learning but production
- * deployments should consider a framework for routing, middleware, and
- * error handling.
+ * A compact framework‑free HTTP server built on Node.js core modules.
+ *
+ * Contains routing logic for authentication, user management, and file
+ * uploads.  Helpers are defined below to centralize response formatting
+ * (`createSendResponse`) and static file delivery (`serveUploadAsset`).
+ *
+ * Although intended for educational purposes, the code is structured to
+ * resemble a minimal MVC pattern.  Production systems should migrate to a
+ * mature framework such as Express or Fastify for enhanced middleware
+ * support and maintainability.
  */
 
 require('dotenv').config();
@@ -15,10 +28,6 @@ const errorResponse = require('./utils/errorResponse');
 const setSecurityHeaders = require('./utils/securityHeader');
 const urlModule = require('url');
 const userRoutes = require('./routes/userRoutes');
-const {
-  getUploadPage,
-  uploadFile,
-} = require('./controllers/fileUploadController');
 
 const path = require('path');
 const fs = require('fs');
@@ -26,16 +35,17 @@ const fs = require('fs');
 // Connect to Database
 connectDB();
 
-const server = http.createServer(async (req, res) => {
-  if (req.method === 'OPTIONS') {
-    setSecurityHeaders(res);
-    res.writeHead(204);
-    return res.end();
-  }
 
-  const startTime = Date.now();
+// helper utilities --------------------------------------------------
+// - `createSendResponse` returns a closure bound to the request/response
+//   pair and start time.  It applies security headers, logs timing, and
+//   centralizes JSON formatting.
+// - `serveUploadAsset` and `isStaticUpload` handle readonly file serving
+//   from the `/uploads` directory.  This keeps file-streaming out of the
+//   main request branch.
 
-  const sendResponse = (statusCode, data) => {
+function createSendResponse(res, req, startTime) {
+  return (statusCode, data) => {
     setSecurityHeaders(res);
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(data));
@@ -43,47 +53,63 @@ const server = http.createServer(async (req, res) => {
     const duration = Date.now() - startTime;
     logger(req, statusCode, duration);
   };
+}
+
+function serveUploadAsset(pathname, res) {
+  const filePath = path.join(__dirname, pathname);
+  if (!fs.existsSync(filePath)) return false;
+
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeTypes = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+  };
+
+  res.writeHead(200, {
+    'Content-Type': mimeTypes[ext] || 'application/octet-stream',
+  });
+  fs.createReadStream(filePath).pipe(res);
+  return true;
+}
+
+function isStaticUpload(pathname, method) {
+  return method === 'GET' && pathname.startsWith('/uploads/');
+}
+
+// server --------------------------------------------------
+const server = http.createServer(async (req, res) => {
+  const startTime = Date.now();
+
+    // CORS preflight requests are short‑circuited here
+  if (req.method === 'OPTIONS') {
+    setSecurityHeaders(res);
+    res.writeHead(204);
+    return res.end();
+  }
+
+  const parsedUrl = urlModule.parse(req.url || '', true);
+  const { pathname } = parsedUrl;
+  const sendResponse = createSendResponse(res, req, startTime);
 
   try {
-    const parsedUrl = urlModule.parse(req.url, true);
-    const pathname = parsedUrl.pathname;
+    // static files under /uploads
+    if (isStaticUpload(pathname, req.method)) {
+      if (serveUploadAsset(pathname, res)) return;
+    }
 
-    if (pathname === '/signup' || pathname === '/login') {
+    // delegate all route logic to central router
+    if (
+      pathname === '/signup' ||
+      pathname === '/login' ||
+      pathname.startsWith('/users') ||
+      pathname.startsWith('/upload')
+    ) {
       return await userRoutes(req, res, parsedUrl, sendResponse);
     }
 
-    if (pathname.startsWith('/users')) {
-      return await userRoutes(req, res, parsedUrl, sendResponse);
-    }
-
-    if (pathname.startsWith('/uploads/') && req.method === 'GET') {
-      const filePath = path.join(__dirname, pathname);
-      if (fs.existsSync(filePath)) {
-        const ext = path.extname(filePath).toLowerCase();
-        const mimeTypes = {
-          '.png': 'image/png',
-          '.jpg': 'image/jpeg',
-          '.jpeg': 'image/jpeg',
-          '.gif': 'image/gif',
-        };
-        res.writeHead(200, {
-          'Content-Type': mimeTypes[ext] || 'application/octet-stream',
-        });
-        return fs.createReadStream(filePath).pipe(res);
-      }
-    }
-
-    if (pathname.startsWith('/upload') && req.method === 'GET') {
-      // render upload form via controller
-      return getUploadPage(req, res);
-    }
-
-    if (pathname.startsWith('/upload') && req.method === 'POST') {
-      // delegate file handling to controller
-      return uploadFile(req, res, sendResponse);
-    }
-
-    // nothing matched; respond 404
+    // catch-all
     return sendResponse(404, { status: 'fail', error: 'Not Found' });
   } catch (error) {
     return errorResponse(req, res, error, startTime);

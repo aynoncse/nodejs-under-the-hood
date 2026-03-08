@@ -21,16 +21,15 @@ if (!dbURI) {
 }
 
 const connectDB = async () => {
-    try {
-        await mongoose
-           .connect(process.env.MONGO_URI, {
-             dbName: process.env.DB_NAME,
-           })
-           console.log('Successfully connected to MongoDB Atlas!');
-    } catch (error) {
-        console.error('Error connecting to Atlas:', err);
-        process.exit(1);
-    }
-}
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      dbName: process.env.DB_NAME,
+    });
+    console.log('Successfully connected to MongoDB Atlas!');
+  } catch (error) {
+    console.error('Error connecting to Atlas:', error);
+    process.exit(1);
+  }
+};
 
-module.exports = connectDB
+module.exports = connectDB;

@@ -6,8 +6,8 @@
  * omitted in production (NODE_ENV === 'production').
  */
 
-const logger = require("./logger");
-const setSecurityHeaders = require("./securityHeader");
+const logger = require('./logger');
+const setSecurityHeaders = require('./securityHeader');
 
 const errorResponse = (req, res, error, startTime) => {
   const duration = Date.now() - startTime;
@@ -17,7 +17,7 @@ const errorResponse = (req, res, error, startTime) => {
   let statusCode = 500;
   let message = 'Internal Server Error';
 
-  // ১. Mongoose Validation Error
+  // 1. Mongoose Validation Error
   if (error.name === 'ValidationError') {
     statusCode = 400;
     message = Object.values(error.errors)
@@ -25,13 +25,13 @@ const errorResponse = (req, res, error, startTime) => {
       .join(', ');
   }
 
-  // ২. Duplicate Key Error
+  // 2. Duplicate Key Error
   if (error.code === 11000) {
     statusCode = 400;
     message = 'Email already exists. Please use a different one.';
   }
 
-  // ৩. Invalid ObjectId format Error
+  // 3. Invalid ObjectId format Error
   if (error.name === 'CastError') {
     statusCode = 400;
     message = `Invalid ${error.path}: ${error.value}`;
@@ -40,7 +40,7 @@ const errorResponse = (req, res, error, startTime) => {
   // already logged above before header sent, but recalc for completeness
   // include stack/message in development to ease debugging
   const responseBody = { status: 'fail', message };
-  
+
   if (process.env.NODE_ENV !== 'production') {
     responseBody.error = {
       message: error.message,
