@@ -1,3 +1,9 @@
+/**
+ * utils/validateLoginForm.js
+ *
+ * Validates login form payloads, ensuring non-empty email/password and
+ * basic format checks.  Returns an object containing `isValid` and `errors`.
+ */
 const validateLoginForm = (data) => {
   const errors = [];
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

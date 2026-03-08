@@ -1,6 +1,23 @@
+/**
+ * controllers/userController.js
+ *
+ * CRUD operations for the User model.  Each exported function receives a
+ * `sendResponse` helper to standardize JSON responses and a parsed body or
+ * query data as needed.  Validation is performed earlier by validator
+ * utilities.
+ */
+
 const User = require('../models/User');
 const getRequestBody = require('../utils/bodyParse');
 
+/**
+ * Retrieve users matching optional query filters (name/email).
+ *
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ * @param {Object} queryData - parsed URL query parameters
+ * @param {Function} sendResponse - helper to write status/data JSON
+ */
 const getAllUsers = async (req, res, queryData, sendResponse) => {
   let filter = {};
   if (queryData.name) {
@@ -18,6 +35,10 @@ const getAllUsers = async (req, res, queryData, sendResponse) => {
   });
 };
 
+/**
+ * Create a new user after validating request body.
+ * Responds with 201 and the created document, or 400 on validation failure.
+ */
 const createUser = async (req, res, sendResponse) => {
   const userData = await getRequestBody(req);
   const validation = validateUser(userData);
@@ -33,6 +54,11 @@ const createUser = async (req, res, sendResponse) => {
   });
 };
 
+/**
+ * Delete a user by MongoDB ObjectId.
+ * @param {string} id - user id to remove
+ * @param {Function} sendResponse
+ */
 const deleteUser = async (id, sendResponse) => {
   const deleted = await User.findByIdAndDelete(id);
   
@@ -46,6 +72,10 @@ const deleteUser = async (id, sendResponse) => {
   });
 };
 
+/**
+ * Update a user's properties identified by id.
+ * Accepts JSON body and runs schema validators on update.
+ */
 const updateUser = async (req, id, sendResponse) => {
     const userData = await getRequestBody(req);
     const updatedUser = await User.findByIdAndUpdate(id, userData, {

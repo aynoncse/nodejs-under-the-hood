@@ -1,3 +1,8 @@
+/**
+ * utils/validateSignupForm.js
+ *
+ * Validates signup payloads; checks name, email format, and password length.
+ */
 const validateSignupForm = (data) => {
   const errors = [];
 

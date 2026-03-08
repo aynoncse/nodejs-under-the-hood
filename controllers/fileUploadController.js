@@ -1,3 +1,11 @@
+/**
+ * controllers/fileUploadController.js
+ *
+ * Provides a very basic HTML upload form and manual multipart parser.
+ * This is intentionally low‑level; production code should use a library
+ * (multer, busboy) and store files in a dedicated service (S3, etc.).
+ */
+
 const fs = require('fs');
 const path = require('path');
 

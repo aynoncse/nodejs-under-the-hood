@@ -1,3 +1,17 @@
+/**
+ * config/db.js
+ *
+ * MongoDB connection helper using mongoose. Exits the process if the
+ * required connection string is missing.  In a real production system the
+ * URI should be obtained from a secure vault or environment variable and
+ * the cluster should be configured with authentication, TLS, and proper
+ * networking rules.
+ *
+ * ENV VARIABLES:
+ *   - MONGO_URI : full connection string (required)
+ *   - DB_NAME   : optional database name to use
+ */
+
 const mongoose = require('mongoose');
 // Connect to MongoDB Atlas
 const dbURI = process.env.MONGO_URI;

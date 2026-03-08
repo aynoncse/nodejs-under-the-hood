@@ -1,3 +1,9 @@
+/**
+ * utils/userValidator.js
+ *
+ * Simple server-side validation for user objects.  Checks name length and
+ * email format.  Used by controllers before database operations.
+ */
 const validateUser = (data) => {
     const errors = [];
 

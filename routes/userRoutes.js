@@ -1,3 +1,13 @@
+/**
+ * routes/userRoutes.js
+ *
+ * Simple routing layer that inspects the request URL and method and delegates
+ * to controller functions.  Authentication is enforced for protected
+ * endpoints using a JWT verification utility.
+ *
+ * This file mimics express-style routing manually; in real-world projects you
+ * would typically use a framework or dedicated router library.
+ */
 const { signup, login } = require('../controllers/authController');
 const {
   getAllUsers,

@@ -1,3 +1,11 @@
+/**
+ * controllers/authController.js
+ *
+ * Handles signup and login flows, including password hashing and JWT
+ * generation. In production, password complexity and rate limiting should be
+ * enforced.
+ */
+
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -5,6 +13,10 @@ const getRequestBody = require('../utils/bodyParse');
 const validateSignupForm = require('../utils/validateSignupForm');
 const validateLoginForm = require('../utils/validateLoginForm');
 
+/**
+ * Register a new user account.
+ * Validates payload, hashes password, and stores in MongoDB.
+ */
 const signup = async (req, res, sendResponse) => {
   const { name, email, password } = await getRequestBody(req);
 
@@ -29,6 +41,9 @@ const signup = async (req, res, sendResponse) => {
 };
 
 
+/**
+ * Authenticate credentials and return a signed JWT on success.
+ */
 const login = async (req, res, sendResponse) => {
   const { email, password } = await getRequestBody(req);
 

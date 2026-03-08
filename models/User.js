@@ -1,3 +1,10 @@
+/**
+ * models/User.js
+ *
+ * Mongoose schema definition for application users.  Includes fields for
+ * name, email, password hash, role, and timestamps.  Unique email index is
+ * enforced at the schema level.
+ */
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({

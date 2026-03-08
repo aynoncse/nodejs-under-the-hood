@@ -1,3 +1,10 @@
+/**
+ * utils/auth.js
+ *
+ * Simple JWT authentication middleware. Parses the Authorization header and
+ * verifies the token using JWT_SECRET.  In production, consider token
+ * revocation, refresh tokens, and stronger validation.
+ */
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req) => {

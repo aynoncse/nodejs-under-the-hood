@@ -1,3 +1,11 @@
+/**
+ * utils/errorResponse.js
+ *
+ * Centralized error handler used by the main server.  It logs the error,
+ * adds security headers, and sends a JSON response.  The stack trace is
+ * omitted in production (NODE_ENV === 'production').
+ */
+
 const logger = require("./logger");
 const setSecurityHeaders = require("./securityHeader");
 

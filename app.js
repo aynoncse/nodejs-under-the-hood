@@ -1,3 +1,12 @@
+/**
+ * app.js - Main HTTP server for the application
+ *
+ * This file manually implements a basic HTTP server without Express.  It
+ * illustrates a low‑level approach suitable for learning but production
+ * deployments should consider a framework for routing, middleware, and
+ * error handling.
+ */
+
 require('dotenv').config();
 const http = require('http');
 const connectDB = require('./config/db');
